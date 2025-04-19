@@ -1,5 +1,7 @@
 package com.belmu.belgianmobilitysolver.model;
 
+import java.util.Map;
+
 public class Stop {
 
     private final String stopId;
@@ -30,5 +32,9 @@ public class Stop {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public static Stop getStopFromId(Map<String, Stop> stopsMap, String stopId) {
+        return stopsMap.get(stopId);
     }
 }

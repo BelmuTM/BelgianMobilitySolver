@@ -1,5 +1,7 @@
 package com.belmu.belgianmobilitysolver.model;
 
+import java.util.Map;
+
 public class Route {
 
     private final String routeId;
@@ -32,5 +34,9 @@ public class Route {
 
     public TransportType getTransportType() {
         return transportType;
+    }
+
+    public static Route getRouteFromId(Map<String, Route> routesMap, String routeId) {
+        return routesMap.get(routeId);
     }
 }

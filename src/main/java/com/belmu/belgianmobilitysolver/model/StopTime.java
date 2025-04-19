@@ -12,6 +12,8 @@ public class StopTime {
     private final String stopId;
     private final short stopSequence;
 
+    private Stop stop;
+
     public StopTime(String tripId, String departureTime, String stopId, String stopSequence) {
         this.tripId = tripId;
 
@@ -41,6 +43,14 @@ public class StopTime {
 
     public String getStopId() {
         return stopId;
+    }
+
+    public Stop getStop() {
+        return stop;
+    }
+
+    public void setStop(Stop stop) {
+        this.stop = stop;
     }
 
     public short getStopSequence() {

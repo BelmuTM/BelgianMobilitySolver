@@ -10,27 +10,30 @@ import com.opencsv.CSVReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class DataParser {
 
-    public List<Route>    routesList    = new ArrayList<>();
-    public List<Stop>     stopsList     = new ArrayList<>();
-    public List<StopTime> stopTimesList = new ArrayList<>();
-    public List<Trip>     tripsList     = new ArrayList<>();
-
-    private final String routesDataFile    = "/routes.csv";
-    private final String stopsDataFile     = "/stops.csv";
-    private final String stopTimesDataFile = "/stop_times.csv";
-    private final String tripsDataFile     = "/trips.csv";
-
-    private final String[] transportCompanies = {
-            "DELIJN", "SNCB", "STIB", "TEC"
-    };
+    Map<String, Route>          routesMap    = new HashMap<>();
+    Map<String, Stop>           stopsMap     = new HashMap<>();
+    Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
+    Map<String, Trip>           tripsMap     = new HashMap<>();
 
     public DataParser() {
+        final String routesDataFile    = "/routes.csv";
+        final String stopsDataFile     = "/stops.csv";
+        final String stopTimesDataFile = "/stop_times.csv";
+        final String tripsDataFile     = "/trips.csv";
+
+        final String[] transportCompanies = {
+                "DELIJN", "SNCB", "STIB", "TEC"
+        };
+
+        List<Route>    routesList    = new ArrayList<>();
+        List<Stop>     stopsList     = new ArrayList<>();
+        List<StopTime> stopTimesList = new ArrayList<>();
+        List<Trip>     tripsList     = new ArrayList<>();
+
         long start = System.currentTimeMillis();
 
         System.out.println("Info: Parsing transport data files.");
@@ -40,6 +43,35 @@ public class DataParser {
             parseData(company + stopsDataFile    , Stop.class    , stopsList    );
             parseData(company + stopTimesDataFile, StopTime.class, stopTimesList);
             parseData(company + tripsDataFile    , Trip.class    , tripsList    );
+        }
+
+        for (Route route : routesList) {
+            routesMap.put(route.getRouteId(), route);
+        }
+
+        for (Stop stop : stopsList) {
+            stopsMap.put(stop.getStopId(), stop);
+        }
+
+        for (Trip trip : tripsList) {
+            trip.setRoute(Route.getRouteFromId(routesMap, trip.getRouteId()));
+            tripsMap.put(trip.getTripId(), trip);
+        }
+
+        for (StopTime stopTime : stopTimesList) {
+            stopTime.setStop(Stop.getStopFromId(stopsMap, stopTime.getStopId()));
+
+            List<StopTime> times = stopTimesMap.get(stopTime.getTripId()) == null ? new ArrayList<>() : stopTimesMap.get(stopTime.getTripId());
+
+            times.add(stopTime);
+
+            stopTimesMap.put(stopTime.getTripId(), times);
+        }
+
+        List<StopTime> times = stopTimesMap.get("DELIJN-0");
+
+        for (StopTime stopTime : times) {
+            System.out.println(stopTime.getTripId() + " " + stopTime.getStopId());
         }
 
         long elapsed = System.currentTimeMillis() - start;
