@@ -1,5 +1,7 @@
 package com.belmu.belgianmobilitysolver.model;
 
+import java.util.Map;
+
 public class Trip {
 
     private final String tripId;
@@ -10,6 +12,13 @@ public class Trip {
     public Trip(String tripId, String routeId) {
         this.tripId  = tripId;
         this.routeId = routeId;
+    }
+
+    public static ReferenceResolver<Trip> resolver(Map<String, Route> routesMap, Map<String, Trip> tripsMap) {
+        return trip -> {
+            trip.setRoute(Route.getRouteFromId(routesMap, trip.getRouteId()));
+            tripsMap.put(trip.getTripId(), trip);
+        };
     }
 
     public String getTripId() {

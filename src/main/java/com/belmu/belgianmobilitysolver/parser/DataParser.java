@@ -1,9 +1,6 @@
 package com.belmu.belgianmobilitysolver.parser;
 
-import com.belmu.belgianmobilitysolver.model.Route;
-import com.belmu.belgianmobilitysolver.model.Stop;
-import com.belmu.belgianmobilitysolver.model.StopTime;
-import com.belmu.belgianmobilitysolver.model.Trip;
+import com.belmu.belgianmobilitysolver.model.*;
 
 import com.opencsv.CSVReader;
 
@@ -14,10 +11,10 @@ import java.util.*;
 
 public class DataParser {
 
-    Map<String, Route>          routesMap    = new HashMap<>();
-    Map<String, Stop>           stopsMap     = new HashMap<>();
-    Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
-    Map<String, Trip>           tripsMap     = new HashMap<>();
+    public Map<String, Route>          routesMap    = new HashMap<>();
+    public Map<String, Stop>           stopsMap     = new HashMap<>();
+    public Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
+    public Map<String, Trip>           tripsMap     = new HashMap<>();
 
     public DataParser() {
         final String routesDataFile    = "/routes.csv";
@@ -29,53 +26,18 @@ public class DataParser {
                 "DELIJN", "SNCB", "STIB", "TEC"
         };
 
-        List<Route>    routesList    = new ArrayList<>();
-        List<Stop>     stopsList     = new ArrayList<>();
-        List<StopTime> stopTimesList = new ArrayList<>();
-        List<Trip>     tripsList     = new ArrayList<>();
-
-        long start = System.currentTimeMillis();
-
+        long startTimeMs = System.currentTimeMillis();
         System.out.println("Info: Parsing transport data files.");
 
         for (String company : transportCompanies) {
-            parseData(company + routesDataFile   , Route.class   , routesList   );
-            parseData(company + stopsDataFile    , Stop.class    , stopsList    );
-            parseData(company + stopTimesDataFile, StopTime.class, stopTimesList);
-            parseData(company + tripsDataFile    , Trip.class    , tripsList    );
+            parseData(company + routesDataFile   , Route.class   , Route   .resolver(routesMap              ));
+            parseData(company + stopsDataFile    , Stop.class    , Stop    .resolver(stopsMap               ));
+            parseData(company + stopTimesDataFile, StopTime.class, StopTime.resolver(stopsMap , stopTimesMap));
+            parseData(company + tripsDataFile    , Trip.class    , Trip    .resolver(routesMap, tripsMap    ));
         }
 
-        for (Route route : routesList) {
-            routesMap.put(route.getRouteId(), route);
-        }
-
-        for (Stop stop : stopsList) {
-            stopsMap.put(stop.getStopId(), stop);
-        }
-
-        for (Trip trip : tripsList) {
-            trip.setRoute(Route.getRouteFromId(routesMap, trip.getRouteId()));
-            tripsMap.put(trip.getTripId(), trip);
-        }
-
-        for (StopTime stopTime : stopTimesList) {
-            stopTime.setStop(Stop.getStopFromId(stopsMap, stopTime.getStopId()));
-
-            List<StopTime> times = stopTimesMap.get(stopTime.getTripId()) == null ? new ArrayList<>() : stopTimesMap.get(stopTime.getTripId());
-
-            times.add(stopTime);
-
-            stopTimesMap.put(stopTime.getTripId(), times);
-        }
-
-        List<StopTime> times = stopTimesMap.get("DELIJN-0");
-
-        for (StopTime stopTime : times) {
-            System.out.println(stopTime.getTripId() + " " + stopTime.getStopId());
-        }
-
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println("Info: Parsing transport data files took " + elapsed + " ms.");
+        long elapsedTimeMs = System.currentTimeMillis() - startTimeMs;
+        System.out.println("Info: Parsing transport data files took " + elapsedTimeMs + " ms.");
     }
 
     /**
@@ -87,9 +49,10 @@ public class DataParser {
      *
      * @param path the string designating the data file's path in the resources folder
      * @param type the class type of the instance we want to create
-     * @param list the list in which we store the created instance
+     * @param solver used to link the different entities together directly after parsing
      */
-    private <T> void parseData(String path, Class<T> type, List<T> list) {
+    @SuppressWarnings("unchecked")
+    private <T> void parseData(String path, Class<T> type, ReferenceResolver<T> solver) {
         try {
             FileReader fileReader = new FileReader(
                     Objects.requireNonNull(getClass().getClassLoader().getResource(path)).getPath()
@@ -112,9 +75,14 @@ public class DataParser {
                     }
                 }
 
+                // Creating a new instance from the class' found constructor and adding it to the specified list
                 if (constructor != null) {
                     T instance = constructor.newInstance((Object[]) nextLine);
-                    list.add(instance);
+
+                    // Linking the entity to its peers in the graph
+                    if (solver != null) {
+                        solver.resolveEntity(instance);
+                    }
                 } else {
                     System.out.println("Error: Specified class type " + type.getName() + " does not correspond parsed data.");
                 }

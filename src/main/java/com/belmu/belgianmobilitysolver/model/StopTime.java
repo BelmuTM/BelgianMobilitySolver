@@ -2,6 +2,9 @@ package com.belmu.belgianmobilitysolver.model;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class StopTime {
 
@@ -17,6 +20,22 @@ public class StopTime {
     public StopTime(String tripId, String departureTime, String stopId, String stopSequence) {
         this.tripId = tripId;
 
+        this.departureTime = parseDepartureTime(departureTime);
+
+        this.stopId       = stopId;
+        this.stopSequence = Short.parseShort(stopSequence);
+    }
+
+    public static ReferenceResolver<StopTime> resolver(Map<String, Stop> stopsMap, Map<String, List<StopTime>> stopTimesMap) {
+        return stopTime -> {
+            stopTime.setStop(stopsMap.get(stopTime.getStopId()));
+            stopTimesMap
+                    .computeIfAbsent(stopTime.getTripId(), k -> new ArrayList<>())
+                    .add(stopTime);
+        };
+    }
+
+    private LocalTime parseDepartureTime(String departureTime) {
         // Replacing hours with a value of 24 by 00 (midnight) to respect the ISO format (0-23)
         String hours      = departureTime.split(":")[0];
         short  hoursValue = Short.parseShort(hours);
@@ -27,10 +46,7 @@ public class StopTime {
         }
 
         final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        this.departureTime = LocalTime.parse(departureTime, timeFormatter);
-
-        this.stopId       = stopId;
-        this.stopSequence = Short.parseShort(stopSequence);
+        return LocalTime.parse(departureTime, timeFormatter);
     }
 
     public String getTripId() {

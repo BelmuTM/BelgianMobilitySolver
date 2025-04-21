@@ -20,6 +20,10 @@ public class Route {
         this.transportType = TransportType.fromString(transportType);
     }
 
+    public static ReferenceResolver<Route> resolver(Map<String, Route> routesMap) {
+        return route -> routesMap.put(route.getRouteId(), route);
+    }
+
     public String getRouteId() {
         return routeId;
     }

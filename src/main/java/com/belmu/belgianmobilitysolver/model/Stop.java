@@ -18,6 +18,10 @@ public class Stop {
         this.longitude = Double.parseDouble(longitude);
     }
 
+    public static ReferenceResolver<Stop> resolver(Map<String, Stop> stopsMap) {
+        return stop -> stopsMap.put(stop.getStopId(), stop);
+    }
+
     public String getStopId() {
         return stopId;
     }
