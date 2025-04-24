@@ -4,8 +4,8 @@ public enum TransportType {
 
     TRAIN,
     METRO,
-    BUS,
-    TRAM;
+    BUS  ,
+    TRAM ;
 
     public static TransportType fromString(String value) {
         try {

@@ -11,9 +11,13 @@ import java.util.*;
 
 public class DataParser {
 
+    // <routeId, Route>
     public Map<String, Route>          routesMap    = new HashMap<>();
+    // <stopId, Stop>
     public Map<String, Stop>           stopsMap     = new HashMap<>();
+    // <tripId, List<StopTime>>
     public Map<String, List<StopTime>> stopTimesMap = new HashMap<>();
+    // <tripId, Trip>
     public Map<String, Trip>           tripsMap     = new HashMap<>();
 
     public DataParser() {

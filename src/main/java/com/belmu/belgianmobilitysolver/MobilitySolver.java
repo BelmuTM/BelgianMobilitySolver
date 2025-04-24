@@ -1,20 +1,29 @@
 package com.belmu.belgianmobilitysolver;
 
-import com.belmu.belgianmobilitysolver.model.StopTime;
 import com.belmu.belgianmobilitysolver.parser.DataParser;
+import com.belmu.belgianmobilitysolver.pathfinder.Edge;
+import com.belmu.belgianmobilitysolver.pathfinder.Pathfinder;
 
+import java.time.LocalTime;
 import java.util.List;
 
 public class MobilitySolver {
 
     public static void main(String[] args) {
 
-        DataParser parser = new DataParser();
+        DataParser parser     = new DataParser();
+        Pathfinder pathfinder = new Pathfinder(parser);
 
-        List<StopTime> times = parser.stopTimesMap.get("DELIJN-0");
+        List<Edge> path = pathfinder.findPath("DELIJN-509720", "SNCB-S8865003", LocalTime.of(10, 30));
 
-        for (StopTime stopTime : times) {
-            System.out.println(stopTime.getTripId() + " " + stopTime.getStopId());
+        for (Edge edge : path) {
+            System.out.printf(
+                    "%s → %s : depart %s, arrive %s%n",
+                    edge.getFrom().getStopId(),
+                    edge.getTo().getStopId(),
+                    edge.getFrom().getTime(),
+                    edge.getTo().getTime()
+            );
         }
     }
 }
