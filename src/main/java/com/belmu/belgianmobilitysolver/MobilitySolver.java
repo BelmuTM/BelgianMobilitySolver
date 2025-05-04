@@ -19,10 +19,10 @@ public class MobilitySolver {
         for (Edge edge : path) {
             System.out.printf(
                     "%s → %s : depart %s, arrive %s%n",
-                    edge.getFrom().getStopId(),
-                    edge.getTo().getStopId(),
-                    edge.getFrom().getTime(),
-                    edge.getTo().getTime()
+                    edge.getFrom().stopId(),
+                    edge.getTo().stopId(),
+                    edge.getFrom().time(),
+                    edge.getTo().time()
             );
         }
     }
