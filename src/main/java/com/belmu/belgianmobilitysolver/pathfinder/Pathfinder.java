@@ -155,6 +155,7 @@ public class Pathfinder {
     public void outputShortestGTFSPath(Node destination) {
         Node current = destination;
 
+        final String separator     = "--------------------------------------------------";
         final String walkFormat    = "Walk from %s (%s) to %s (%s)";
         final String transitFormat = "Take %s %s %s from %s (%s) to %s (%s)";
 
@@ -193,9 +194,14 @@ public class Pathfinder {
         // Reversing the list of string outputs to start at the beginning of the path
         Collections.reverse(route);
 
+        // Printing a line separator for readability
+        System.out.println(separator);
+
         // Printing all outputs in order
         for (String trip : route) {
             System.out.println(trip);
         }
+
+        System.out.println(separator);
     }
 }
