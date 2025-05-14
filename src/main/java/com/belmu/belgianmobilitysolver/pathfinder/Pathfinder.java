@@ -17,8 +17,14 @@ public class Pathfinder {
 
     private final DataParser data;
 
+    private final SpatialHashGrid hashGrid;
+
     public Pathfinder(DataParser dataParser) {
         this.data = dataParser;
+
+        // Building the spatial hash grid of cells (buckets) storing stops per fixed unit of area
+        hashGrid = new SpatialHashGrid();
+        hashGrid.build(this.data.stops.values());
     }
 
     /**
@@ -50,9 +56,6 @@ public class Pathfinder {
     }
 
     public Node findShortestGTFSPath(String startStopId, String endStopId, long departureTime) {
-        // Building the spatial hash grid of cells (buckets) storing stops per fixed unit of area
-        SpatialHashGrid hashGrid = new SpatialHashGrid();
-        hashGrid.build(data.stops.values());
 
         PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingLong(s -> s.time));
         queue.add(new Node(null, startStopId, null, departureTime, 0, false));
