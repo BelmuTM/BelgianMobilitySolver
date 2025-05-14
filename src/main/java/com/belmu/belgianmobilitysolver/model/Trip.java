@@ -16,7 +16,7 @@ public class Trip {
 
     public static ReferenceResolver<Trip> resolver(Map<String, Route> routesMap, Map<String, Trip> tripsMap) {
         return trip -> {
-            trip.setRoute(Route.getRouteFromId(routesMap, trip.getRouteId()));
+            trip.setRoute(routesMap.get(trip.getRouteId()));
             tripsMap.put(trip.getTripId(), trip);
         };
     }

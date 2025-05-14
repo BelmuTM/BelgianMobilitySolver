@@ -1,11 +1,18 @@
-package com.belmu.belgianmobilitysolver.cost;
+package com.belmu.belgianmobilitysolver.pathfinder;
 
 import com.belmu.belgianmobilitysolver.model.Stop;
 
 public class DistanceFunction {
 
-    // https://en.wikipedia.org/wiki/Haversine_formula
-    public double computeCost(Stop from, Stop to) {
+    /**
+     * Computes the distance between two stops using the
+     * <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a>.
+     *
+     * @param from the source stop
+     * @param to the destination stop
+     * @return the great-circle distance between the two stops in kilometers
+     */
+    public static double computeDistance(Stop from, Stop to) {
         final double radius = 6372.8; // Earth's radius in kilometers
 
         double latitudeFrom = Math.toRadians(from.getLatitude());

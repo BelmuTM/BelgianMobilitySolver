@@ -2,8 +2,7 @@ plugins {
     id("java")
 }
 
-group   = "com.belmu"
-version = "1.0"
+group = "com.belmu.belgianmobilitysolver"
 
 repositories {
     mavenCentral()
@@ -18,4 +17,16 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "com.belmu.belgianmobilitysolver.MobilitySolver"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from({
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    })
 }

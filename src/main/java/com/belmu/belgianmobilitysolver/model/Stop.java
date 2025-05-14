@@ -38,7 +38,13 @@ public class Stop {
         return longitude;
     }
 
-    public static Stop getStopFromId(Map<String, Stop> stopsMap, String stopId) {
-        return stopsMap.get(stopId);
+    public static Stop getStopByName(Map<String, Stop> stopsMap, String name) {
+
+        for (Stop stop : stopsMap.values()) {
+            if (stop.getName().equalsIgnoreCase(name)) {
+                return stop;
+            }
+        }
+        return null;
     }
 }

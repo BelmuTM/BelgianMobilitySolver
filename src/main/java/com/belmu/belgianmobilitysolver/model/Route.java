@@ -39,8 +39,4 @@ public class Route {
     public TransportType getTransportType() {
         return transportType;
     }
-
-    public static Route getRouteFromId(Map<String, Route> routesMap, String routeId) {
-        return routesMap.get(routeId);
-    }
 }
