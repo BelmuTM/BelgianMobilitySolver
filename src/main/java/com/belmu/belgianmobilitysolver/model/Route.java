@@ -9,7 +9,7 @@ public class Route {
     private final String shortName;
     private final String longName;
 
-    private final TransportType transportType;
+    private TransportType transportType;
 
     public Route(String routeId, String shortName, String longName, String transportType) {
         this.routeId   = routeId;

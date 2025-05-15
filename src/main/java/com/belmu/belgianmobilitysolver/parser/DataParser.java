@@ -64,9 +64,9 @@ public class DataParser {
      * then reads each line to create an instance of said class after filling
      * each of the fields with its value (i.e.: Route.route_id = 123456789).
      *
-     * @param path the string representing the data file's path in the resources folder
-     * @param type the class type of the instance we want to create
-     * @param solver used to link the different entities together directly after parsing
+     * @param path      string representing the data file's path in the resources folder
+     * @param type      class type of the instance we want to create
+     * @param solver    used to link the different entities together directly after parsing
      */
     @SuppressWarnings("unchecked")
     private <T> void parseData(String path, Class<T> type, ReferenceResolver<T> solver) {

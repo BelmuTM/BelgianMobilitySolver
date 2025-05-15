@@ -1,6 +1,7 @@
 package com.belmu.belgianmobilitysolver.pathfinder;
 
 import com.belmu.belgianmobilitysolver.MobilitySolver;
+import com.belmu.belgianmobilitysolver.cost.CostFunction;
 import com.belmu.belgianmobilitysolver.model.Route;
 import com.belmu.belgianmobilitysolver.model.Stop;
 import com.belmu.belgianmobilitysolver.model.StopTime;
@@ -32,9 +33,9 @@ public class Pathfinder {
      * possible after the current time. Assumes that the stop times list is pre-sorted
      * by the departure times.
      *
-     * @param stopTimes the list of possible stop times
-     * @param currentTime the current time in milliseconds
-     * @return the index of the departure that is the earliest after the current time
+     * @param stopTimes     the list of possible stop times
+     * @param currentTime   the current time in milliseconds
+     * @return              the index of the departure that is the earliest after the current time
      */
     public int findNextDepartureIndex(List<StopTime> stopTimes, long currentTime) {
         int lowIndex  = 0;
@@ -55,14 +56,25 @@ public class Pathfinder {
         return result;
     }
 
-    public Node findShortestGTFSPath(String startStopId, String endStopId, long departureTime) {
+    /**
+     * Implementation of the Dijkstra pathfinding algorithm for GTFS transport
+     * data to find the shortest path. Adapts to different cost functions.
+     *
+     * @param startStopId   ID of the departure stop
+     * @param endStopId     ID of the destination stop
+     * @param departureTime time of departure in milliseconds
+     * @param costFunction  function used to compute the cost of edges
+     * @return              destination node representing the end of the path
+     */
+    public Node findShortestGTFSPath(String startStopId, String endStopId, long departureTime, CostFunction costFunction) {
+        PriorityQueue<Node> queue = new PriorityQueue<>(
+                Comparator.comparingLong(n -> n.cost)
+        );
+        queue.add(new Node(0, null, startStopId, null, departureTime, 0, false));
 
-        PriorityQueue<Node> queue = new PriorityQueue<>(Comparator.comparingLong(s -> s.time));
-        queue.add(new Node(null, startStopId, null, departureTime, 0, false));
-
-        // Keeping track of each stop's departure/arrival times to compare the current node to candidate nodes
-        Map<String, Long> times = new HashMap<>();
-        times.put(startStopId, departureTime);
+        // Keeping track of each node's best cost so far
+        Map<String, Long> bestCosts = new HashMap<>();
+        bestCosts.put(startStopId, 0L);
 
         Node destination = null;
 
@@ -77,7 +89,7 @@ public class Pathfinder {
             }
 
             // Skip this node if we already have a better arrival time
-            if (current.time > times.getOrDefault(current.stopId, Long.MAX_VALUE))
+            if (current.cost > bestCosts.getOrDefault(current.stopId, Long.MAX_VALUE))
                 continue;
 
             /*
@@ -103,19 +115,22 @@ public class Pathfinder {
                 if (position != -1) {
                     // Enqueuing all subsequent stops on the trip
                     for (int j = position + 1; j < tripTimes.size(); j++) {
-                        StopTime next     = tripTimes.get(j);
-                        String nextStopId = next.getStopId();
+                        StopTime next       = tripTimes.get(j);
+                        String   nextStopId = next.getStopId();
 
                         long arrivalTime = next.getDepartureTime();
-                        long bestTime    = times.getOrDefault(nextStopId, Long.MAX_VALUE);
 
-                        // Relaxation check (prevents enqueuing slower paths)
-                        if (arrivalTime < bestTime) {
-                            times.put(nextStopId, arrivalTime);
-                            queue.add(new Node(
-                                    current, nextStopId, route, arrivalTime, departure.getDepartureTime(), false
-                            ));
-                        }
+                        Node candidate = new Node(
+                                0L, current, nextStopId, route, arrivalTime, departure.getDepartureTime(), false
+                        );
+
+                        // Computing the cost of the edge to the candidate node
+                        long costIncrement = costFunction.computeEdgeCost(current, candidate, arrivalTime, false);
+                        if (costIncrement == Long.MAX_VALUE) continue;
+
+                        candidate.cost = current.cost + costIncrement;
+
+                        relax(candidate, bestCosts, queue);
                     }
                 }
             }
@@ -136,15 +151,18 @@ public class Pathfinder {
 
                 long walkTime    = (long) ((distance / WALK_SPEED_KPH) * 60 * 60 * 1000); // milliseconds
                 long arrivalTime = current.time + walkTime;
-                long bestTime    = times.getOrDefault(nearbyStop.getStopId(), Long.MAX_VALUE);
 
-                // Relaxation check (prevents enqueuing slower paths)
-                if (arrivalTime < bestTime) {
-                    times.put(nearbyStop.getStopId(), arrivalTime);
-                    queue.add(new Node(
-                            current, nearbyStop.getStopId(), null, arrivalTime, 0, true
-                    ));
-                }
+                Node candidate = new Node(
+                        0L, current, nearbyStop.getStopId(), null, arrivalTime, 0, true
+                );
+
+                // Computing the cost of the edge to the candidate node
+                long costIncrement = costFunction.computeEdgeCost(current, candidate, arrivalTime, true);
+                if (costIncrement == Long.MAX_VALUE) continue;
+
+                candidate.cost = current.cost + costIncrement;
+
+                relax(candidate, bestCosts, queue);
             }
         }
 
@@ -153,6 +171,23 @@ public class Pathfinder {
         }
 
         return destination;
+    }
+
+    /**
+     * Relaxation check for the candidate node in Dijkstra.
+     * Prioritizes optimal paths over slow, undesired ones.
+     *
+     * @param candidate     node to be relaxed
+     * @param bestCosts     map of best cost per stop
+     * @param queue         priority queue ordered by node cost
+     */
+    private void relax(Node candidate, Map<String, Long> bestCosts, PriorityQueue<Node> queue) {
+        long bestCost = bestCosts.getOrDefault(candidate.stopId, Long.MAX_VALUE);
+
+        if (candidate.cost < bestCost) {
+            bestCosts.put(candidate.stopId, candidate.cost);
+            queue.add(candidate);
+        }
     }
 
     public void outputShortestGTFSPath(Node destination) {

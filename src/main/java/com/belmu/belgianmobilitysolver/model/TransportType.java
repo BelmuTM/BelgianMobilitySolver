@@ -2,10 +2,11 @@ package com.belmu.belgianmobilitysolver.model;
 
 public enum TransportType {
 
-    TRAIN,
-    METRO,
     BUS  ,
-    TRAM ;
+    METRO,
+    TRAIN,
+    TRAM ,
+    WALK ;
 
     public static TransportType fromString(String value) {
         try {

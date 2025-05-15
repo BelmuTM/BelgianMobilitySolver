@@ -26,7 +26,7 @@ public class SpatialHashGrid {
     }
 
     /**
-     * @return the encoded hash key of the cell (X coordinate in upper 32 bits, Y coordinate in lower 32 bits)
+     * @return encoded hash key of the cell (X coordinate in upper 32 bits, Y coordinate in lower 32 bits)
      */
     private long hashKey(int cellIndexX, int cellIndexY) {
         return ((long) cellIndexX << 32) | (cellIndexY & 0xffffffffL);
@@ -36,7 +36,7 @@ public class SpatialHashGrid {
      * Builds a spatial hash grid by discretizing the geographical coordinates
      * into two-dimensional cells with a fixed size. Each cell can hold multiple transport stops.
      *
-     * @param stops the list of stops to store in the grid's cells
+     * @param stops list of stops to store in the grid's cells
      */
     public void build(Collection<Stop> stops) {
         for (Stop stop : stops) {
@@ -52,9 +52,9 @@ public class SpatialHashGrid {
      * Iterates grid cells that are neighbours to the specified stop's cell
      * to gather their stops if they are within the acceptable walking distance.
      *
-     * @param center the stop at the center of the search neighbourhood
-     * @param maxWalkDistance the maximum acceptable distance for nearby stops
-     * @return a list of the nearby stops
+     * @param center            the stop at the center of the search neighbourhood
+     * @param maxWalkDistance   maximum acceptable distance for nearby stops
+     * @return                  list of the nearby stops
      */
     public List<Stop> getNearbyStops(Stop center, double maxWalkDistance) {
         List<Stop> nearbyStops = new ArrayList<>();

@@ -28,7 +28,9 @@ Run the executable using the following command in the project's directory:
 java -jar build/libs/BelgianMobilitySolver.jar "Departure Stop" "Destination Stop" "HH:mm:ss"
 ```
 
+Optionally, you can exclude specific transport types from your desired path using the `-bus`, `-metro`, `-train`, `-tram` and `-walk` commandline arguments.
+
 Example:
 ```bash
-java -jar build/libs/BelgianMobilitySolver.jar "Alveringem Nieuwe Herberg" "Aubange" "10:30:00"
+java -jar build/libs/BelgianMobilitySolver.jar "Alveringem Nieuwe Herberg" "Aubange" "10:30:00" -metro -tram
 ```
