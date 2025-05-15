@@ -18,7 +18,7 @@ You can download it from [Oracle](https://www.oracle.com/be/java/technologies/do
 
 Navigate to the project's directory and run this command from your terminal:
 ```bash
-gradlew build
+./gradlew build
 ```
 
 ## Executing
