@@ -37,7 +37,7 @@ public class Pathfinder {
      * @param currentTime   the current time in milliseconds
      * @return              the index of the departure that is the earliest after the current time
      */
-    public int findNextDepartureIndex(List<StopTime> stopTimes, long currentTime) {
+    private int findNextDepartureIndex(List<StopTime> stopTimes, long currentTime) {
         int lowIndex  = 0;
         int highIndex = stopTimes.size() - 1;
 
